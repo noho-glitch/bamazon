@@ -21,22 +21,27 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId + "\n");
-  promptUser();
+  displayProducts();
 });
 
 
 results = [];
 
-
-//query database "bamazon_db" to display all items in table "products"
-var promptUser = function() {
+var displayProducts = function() {
   connection.query("SELECT * FROM products", function(err, results) {
     if (err) throw err;
     for(var i = 0; i < results.length; i++) {
       console.log("\n" +
         results[i].item_id + " | " + results[i].product_name + " | "  + results[i].department_name + " | " + "$" + results[i].price + " | " + results[i].stock_quantity);
       }
+      promptUser(results);
+
   })
+}
+
+//query database "bamazon_db" to display all items in table "products"
+var promptUser = function(results) {
+  
 
 
   inquirer
@@ -49,6 +54,7 @@ var promptUser = function() {
             for (var i = 0; i < results.length; i++) {
               choiceArray.push(results[i].item_id);
             }
+            choiceArray.push("q");
             return choiceArray;
           },
           message: "What item number would you like to purchase? ('q' to quit)"       
@@ -58,26 +64,46 @@ var promptUser = function() {
           type: "number",
           message: "How many would you like to buy?"
         }
-      ]).then(function(checkInventory) {
+      ]).then(function(answer) {
+        var chosenItem;
+console.log(answer.choice)
 
-        var itemChoice;
-        for (var i = 0; i < results.length; i++) {
-          if (results[i].item_id === answer.choice) {
-            itemChoice = results[i];
-          }
-          if (answer.choice === "q") {
-            connection.end()
-          }
-          else (console.log("Sorry that item is not in our inventory"));
-          promptUser();
+        if (answer.choice === "q") {
+          connection.end()
+          return;
         }
 
-        if (checkInventory.quantity <= results[i].stock_quantity) {
-          console.log(results[i].price * checkInventory.quantity)
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].item_id === answer.choice) {
+            chosenItem = results[i]
+           console.log("You chose: " + results[i].product_name);
+          }
+
+        }
+
+        if (answer.quantity <= chosenItem.stock_quantity) {
+          console.log(chosenItem.price * answer.quantity)
+
+          connection.query("UPDATE products SET ? WHERE ?", [
+            {
+              stock_quantity: chosenItem.stock_quantity - answer.quantity
+            },
+            {
+              item_id: chosenItem.item_id
+            }
+
+          ],function(err, results){
+            if (err) throw err;
+
+            displayProducts();
+          });
         };
-        if (checkInventory.quantity > results[i].stock_quantity) {
+
+
+
+        if (answer.quantity > chosenItem.stock_quantity) {
         console.log("Sorry that is not available")
-          promptUser();
+          displayProducts();
         };
       })
 }
