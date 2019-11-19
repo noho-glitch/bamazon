@@ -43,8 +43,15 @@ var promptManager = function (results) {
                 case "VIEW PRODUCTS FOR SALE":
                     displayProducts();
                     break;
+                case "VIEW LOW INVENTORY":
+                    displayLowInventory();
+                    break;
+                case "QUIT":
+                    connection.end();
+                    break;
                 default:
-                    connnection.end()
+                    connection.end()
+                    
             }
         });
 
@@ -57,5 +64,11 @@ var promptManager = function (results) {
             promptManager(results);
         });
     };
+
+    var displayLowInventory = function () {
+        connection.query("SELECT * FROM products WHERE stock_quantity <= 5", function (err, results) {
+            console.table(results);
+        })
+    }
 };
 
