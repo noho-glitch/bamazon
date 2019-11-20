@@ -86,12 +86,19 @@ var promptUser = function(results) {
           for (var i = 0; i < results.length; i++) {
             if (results[i].item_id === answer.choice) {
               chosenItem = results[i];
-              console.log("You chose: " + results[i].product_name);
+              console.log(
+              "--------------------------------------------\n" + 
+              "                  RECEIPT" + "\n" +
+              "--------------------------------------------\n" + "\n" +
+              results[i].product_name + "   @  $" + chosenItem.price + "\n" +
+              "QUANTITY PURCHASED:  " + answer.quantity + "\n" +
+              "--------------------------------------------\n" + 
+               "TOTAL PRICE: $" + (chosenItem.price * answer.quantity) +
+               "\n\n");
             }
           }
 
           if (answer.quantity <= chosenItem.stock_quantity) {
-            console.log(chosenItem.price * answer.quantity);
 
             connection.query(
               "UPDATE products SET ? WHERE ?",
@@ -105,7 +112,10 @@ var promptUser = function(results) {
               ],
               function(err, results) {
                 if (err) throw err;
-
+                console.log(
+                "THANKYOU FOR YOUR PURCHASE \n\n\n" + "--------------------------------------------\n"
+                +"\n\n\n" + 
+                "UPDATED PRODUCT LISTING:" + "\n\n") 
                 setTimeout(displayProducts, 3000); 
               }
             );
