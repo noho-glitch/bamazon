@@ -62,7 +62,7 @@ var promptUser = function(results) {
               for (var i = 0; i < results.length; i++) {
                 choiceArray.push(results[i].item_id);
               }
-              choiceArray.push("q");
+              choiceArray.push("QUIT");
               return choiceArray;
             },
             message:
@@ -71,14 +71,14 @@ var promptUser = function(results) {
           {
             name: "quantity",
             type: "number",
-            message: "How many would you like to buy?"
+            message: "How many would you like to purchase?"
           }
         ])
         .then(function(answer) {
           var chosenItem;
           console.log(answer.choice);
 
-          if (answer.choice === "q") {
+          if (answer.choice === "QUIT") {
             connection.end();
             return;
           }
